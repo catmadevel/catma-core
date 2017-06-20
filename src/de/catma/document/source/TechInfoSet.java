@@ -29,6 +29,7 @@ import java.nio.charset.Charset;
  */
 public class TechInfoSet {
 
+	private String fileName;
 	private FileType fileType;
 	private Charset charset;
 	private FileOSType fileOSType;
@@ -36,6 +37,21 @@ public class TechInfoSet {
 	private String mimeType;
 	private URI uri;
 	private String xsltDocumentLocalUri;
+	
+	/**
+	 * Copy constructor
+	 * @param another the TechInfoSet object to copy
+	 */
+	public TechInfoSet(TechInfoSet another) {
+		this.fileName = another.fileName;
+		this.fileType = another.fileType;
+		this.charset = another.charset;
+		this.fileOSType = another.fileOSType;
+		this.checksum = another.checksum;
+		this.mimeType = another.mimeType;
+		this.uri = another.uri;
+		this.xsltDocumentLocalUri = another.xsltDocumentLocalUri;
+	}
 	
 	/**
 	 * @param fileType the type of the file
@@ -55,12 +71,18 @@ public class TechInfoSet {
 	}
 	
 	/**
+	 * @param fileName name of the file
 	 * @param mimeType mimetype of the file
 	 * @param uri source address
 	 */
-	public TechInfoSet(String mimeType, URI uri) {
+	public TechInfoSet(String fileName, String mimeType, URI uri) {
+		this.fileName = fileName;
 		this.mimeType = mimeType;
 		this.uri = uri;
+	}
+	
+	public String getFileName() {
+		return fileName;
 	}
 
 	public FileType getFileType() {

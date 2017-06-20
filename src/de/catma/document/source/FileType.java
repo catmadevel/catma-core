@@ -20,6 +20,8 @@
 package de.catma.document.source;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The type of a file: pdf, html, text...
@@ -40,11 +42,11 @@ public enum FileType {
 	/**
 	 * HTML-pages.
 	 */
-	HTML("text/html"),
+	HTML(true, "text/html"),
     /**
      * HTM(L)-pages.
      */
-    HTM("text/html"),
+    HTM(true, "text/html"),
     /**
      * RTF-docs.
      */
@@ -52,29 +54,58 @@ public enum FileType {
 	/**
 	 * everything which is not one of the other possibilities
 	 */
-	TEXT("text/plain"),
+	TEXT(true, "text/plain"),
 	/**
 	 * XML files.
 	 */
-	XML("application/xml"), 
-	TEI("application/tei+xml"),
+	XML(true, "application/xml", "text/xml"), 
+	TEI(false, false, "application/tei+xml"), // not active since support would require a proper way to display structural elements and their customizations
 	/**
 	 * MS-Word DOCX files.
 	 */
 	DOCX("application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
+	/**
+	 * ZIP files.
+	 */
+	ZIP("application/zip")
 	;
 	
-	private String mimeType;
+	private String[] mimeTypes;
+	private boolean active;
+	private boolean charsetSupported;
 
-	private FileType(String mimeType) {
-		this.mimeType = mimeType;
+	private FileType(String... mimeTypes) {
+		this(true, false, mimeTypes);
+	}	
+
+	private FileType(boolean supportsCharset, String... mimeTypes) {
+		this(true, supportsCharset, mimeTypes);
+	}	
+	
+	private FileType(boolean active, boolean supportsCharset, String... mimeTypes) {
+		this.mimeTypes = mimeTypes;
+		this.active = active;
+		this.charsetSupported = supportsCharset;
 	}
 	
 	/**
 	 * @return the mime type of this file type.
 	 */
 	public String getMimeType() {
-		return mimeType;
+		return mimeTypes[0];
+	}
+	
+	public boolean hasMimeType(String mimeTypeToTest) {
+		for (String mimeType : mimeTypes) {
+			if (mimeType.equals(mimeTypeToTest)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean isCharsetSupported() {
+		return charsetSupported;
 	}
 	
 	/**
@@ -84,11 +115,21 @@ public enum FileType {
 	 * @return the type of the file
 	 */
 	static FileType getFileType( File file ) {
-		int indexOflastDot = file.getName().lastIndexOf( '.' );
+		return getFileTypeFromName(file.getName());
+	}
+	
+	/**
+	 * Tries to guess the file type by analyzing the file extension i. e. the 
+	 * characters after the last dot.
+	 * @param fileName the filename to analyze
+	 * @return the type of the file
+	 */
+	public static FileType getFileTypeFromName( String fileName ) {
+		int indexOflastDot = fileName.lastIndexOf( '.' );
 
-		if ((indexOflastDot != -1) && (indexOflastDot<(file.getName().length()-1))){
+		if ((indexOflastDot != -1) && (indexOflastDot<(fileName.length()-1))){
 			String extension = 
-				file.getName().substring( indexOflastDot+1 ).toUpperCase();
+					fileName.substring( indexOflastDot+1 ).toUpperCase();
 			for (FileType type : values()) {
                 if( extension.equals( type.name() ) ) {
                     return type;
@@ -105,10 +146,20 @@ public enum FileType {
 	 */
 	public static FileType getFileType(String mimeType) {
 		for (FileType type : values()) {
-			if (type.mimeType.equals(mimeType)) {
+			if (type.hasMimeType(mimeType)) {
 				return type;
 			}
 		}
 		return TEXT;
+	}
+	
+	public static List<FileType> getActiveFileTypes() {
+		List<FileType> result = new ArrayList<FileType>();
+		for (FileType type : values()) {
+			if (type.active) {
+				result.add(type);
+			}
+		}
+		return result;
 	}
 }

@@ -73,6 +73,14 @@ public class IndexInfoSet {
 	public void setLocale(Locale locale) {
 		this.locale = locale;
 	}
+	
+	public LanguageItem getLanguage() {
+		return new LanguageItem(locale);
+	}
+	
+	public void setLanguage(LanguageItem language) {
+		this.locale = language.getLocale();
+	}
 
 	/**
      * @return a (possibly empty) list of unseparable character sequences,
@@ -129,8 +137,8 @@ public class IndexInfoSet {
     		unseparableCharacterSequences.remove(ucs);
     	}
     }
-    
-    public boolean isRightToLeftLanguage() {
+    //TODO: we should use Character.getDirectonality to support mixed content
+    public boolean isRightToLeftWriting() {
 		String lang = getLocale().getLanguage().toLowerCase();
 		if (lang.equals(new Locale("iw").getLanguage().toLowerCase())) {
 			return true;
